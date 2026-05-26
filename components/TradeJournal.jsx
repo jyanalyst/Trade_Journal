@@ -69,8 +69,6 @@ const KILL_ZONES = [
   { id:"kz1700",  label:"1700",   time:"17:00" },
 ];
 
-const GRADES = ["M1★","M1+","M1","A+","A","B","C"];
-
 const mono = { fontFamily:"'DM Mono',monospace" };
 const sans = { fontFamily:"'IBM Plex Sans',sans-serif" };
 
@@ -104,7 +102,6 @@ function newIdea(killZone) {
     dailyCtx:   "",   // phase value
     mthlyCtx:   "",   // phase value
     gates: { G1:false, G2:false, G3:false, G4:false },
-    signalGrade: "",
     observation: "",
     executedAt: null,
   };
@@ -546,13 +543,6 @@ function IdeaCard({ idea, onTap }) {
               borderRadius:4, border:`1px solid ${C.green}`,
               color:C.green, background:C.greenDim }}>{g}</span>
           ) : null)}
-          {idea.signalGrade && (
-            <span style={{ fontSize:10, color:C.amber, background:C.amberDim,
-              border:`1px solid ${C.amber}44`, borderRadius:4,
-              padding:"2px 6px", marginLeft:"auto", ...mono }}>
-              {idea.signalGrade}
-            </span>
-          )}
         </div>
 
         {idea.observation && (
@@ -717,20 +707,6 @@ function EditPanel({ idea, onSave, onClose, onExecute, onCancel }) {
               {gatesOn}/4 active{gatesOn >= 3 ? " — high conviction" : ""}
             </div>
           )}
-        </Field>
-
-        <Field label="Signal Grade">
-          <select value={form.signalGrade} onChange={e => set("signalGrade",e.target.value)}
-            style={{ width:"100%", background:C.bg, border:`1px solid ${C.border}`,
-              borderRadius:6, padding:"9px 28px 9px 10px",
-              color:form.signalGrade ? C.amber : C.textDim,
-              fontSize:12, outline:"none", appearance:"none",
-              cursor:"pointer", boxSizing:"border-box", ...mono }}>
-            <option value="" style={{background:C.surface, color:C.text}}>— select —</option>
-            {GRADES.map(g => (
-              <option key={g} value={g} style={{background:C.surface, color:C.text}}>{g}</option>
-            ))}
-          </select>
         </Field>
 
         <Field label="Observation">
