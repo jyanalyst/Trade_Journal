@@ -30,4 +30,30 @@ body {
 * {
   scrollbar-width: thin;
   scrollbar-color: #1e2d45 #080c14;
+  box-sizing: border-box;
+}
+
+/* Slide-up animation for EditPanel */
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Form focus styles */
+input:focus, select:focus, textarea:focus {
+  border-color: #f0a500 !important;
+  box-shadow: 0 0 0 2px rgba(240,165,0,0.12);
+}
+input::placeholder, textarea::placeholder {
+  color: #344d66;
+}
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+input[type=date] {
+  color-scheme: dark;
+}
+select option {
+  background: #0e1520;
+  color: #dce8f5;
 }
