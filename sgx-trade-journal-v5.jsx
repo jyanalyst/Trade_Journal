@@ -101,6 +101,7 @@ function newIdea(killZone) {
     dailyCtx:   "",   // phase value
     mthlyCtx:   "",   // phase value
     gates: { G1:false, G2:false, G3:false, G4:false },
+    riskFactors: { pwhl:false, orb:false },
     signalGrade: "",
     observation: "",
     executedAt: null,
@@ -130,6 +131,15 @@ function getActionItems(idea) {
     });
   }
   return items;
+}
+
+// ── Risk warnings (computed from risk factor state) ─────────────────────────
+function getRiskWarning(riskFactors) {
+  if (!riskFactors) return null;
+  if (riskFactors.pwhl && riskFactors.orb) {
+    return { risk: "Fake Break", action: "Wait for next day to attack BigBlock" };
+  }
+  return null;
 }
 
 // ── Primitives ────────────────────────────────────────────────────────────────
@@ -275,6 +285,18 @@ function GateBtn({ label, active, onClick }) {
       background: active ? C.greenDim : "transparent",
       color: active ? C.green : C.textDim,
       fontSize:13, fontWeight:600, cursor:"pointer", ...mono, transition:"all 0.15s",
+    }}>{label}</button>
+  );
+}
+
+function RiskBtn({ label, active, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      flex:1, padding:"9px 0", borderRadius:6,
+      border:`1px solid ${active ? C.red : C.border}`,
+      background: active ? C.redDim : "transparent",
+      color: active ? C.red : C.textDim,
+      fontSize:12, fontWeight:600, cursor:"pointer", ...mono, transition:"all 0.15s",
     }}>{label}</button>
   );
 }
@@ -543,6 +565,21 @@ function IdeaCard({ idea, onTap }) {
               borderRadius:4, border:`1px solid ${C.green}`,
               color:C.green, background:C.greenDim }}>{g}</span>
           ) : null)}
+          {idea.riskFactors?.pwhl && (
+            <span style={{ fontSize:9, ...mono, padding:"2px 5px",
+              borderRadius:4, border:`1px solid ${C.red}`,
+              color:C.red, background:C.redDim }}>PWH/L</span>
+          )}
+          {idea.riskFactors?.orb && (
+            <span style={{ fontSize:9, ...mono, padding:"2px 5px",
+              borderRadius:4, border:`1px solid ${C.red}`,
+              color:C.red, background:C.redDim }}>ORB</span>
+          )}
+          {idea.riskFactors?.pwhl && idea.riskFactors?.orb && (
+            <span style={{ fontSize:9, ...mono, padding:"2px 6px",
+              borderRadius:4, border:`1px solid ${C.red}`,
+              color:C.white, background:C.red, fontWeight:700 }}>FAKE BREAK</span>
+          )}
           {idea.signalGrade && (
             <span style={{ fontSize:10, color:C.amber, background:C.amberDim,
               border:`1px solid ${C.amber}44`, borderRadius:4,
@@ -567,12 +604,14 @@ function IdeaCard({ idea, onTap }) {
 }
 
 // ── Edit panel ────────────────────────────────────────────────────────────────
-function EditPanel({ idea, onSave, onClose, onExecute, onCancel }) {
+function EditPanel({ idea, onSave, onClose, onExecute, onCancel, onDelete }) {
   const [form, setForm] = useState({ ...idea });
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const backdropRef = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]:v }));
   const setGate = g => setForm(f => ({ ...f, gates:{ ...f.gates, [g]:!f.gates[g] } }));
+  const setRisk = r => setForm(f => ({ ...f, riskFactors:{ ...(f.riskFactors || { pwhl:false, orb:false }), [r]:!(f.riskFactors || {})[r] } }));
   const setSignal1hr = v =>
     setForm(f => ({ ...f, signal1hr:v, lowerTfSignal:v !== false ? null : f.lowerTfSignal }));
 
@@ -693,6 +732,51 @@ function EditPanel({ idea, onSave, onClose, onExecute, onCancel }) {
           </div>
         )}
 
+        {/* ── RISK ── */}
+        <Divider label="Risk" />
+
+        <Field label="Risk Factors">
+          <div style={{ display:"flex", gap:8 }}>
+            <RiskBtn label="PWH/L · PMH/L" active={(form.riskFactors || {}).pwhl}
+              onClick={() => setRisk("pwhl")} />
+            <RiskBtn label="Outside 15m ORB" active={(form.riskFactors || {}).orb}
+              onClick={() => setRisk("orb")} />
+          </div>
+        </Field>
+
+        {getRiskWarning(form.riskFactors) && (() => {
+          const w = getRiskWarning(form.riskFactors);
+          return (
+            <div style={{
+              background: C.redDim,
+              border: `1px solid ${C.red}55`,
+              borderRadius: 8,
+              padding: "12px 14px",
+              marginBottom: 14,
+              marginTop: -6,
+            }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
+              }}>
+                <span style={{ fontSize: 14 }}>⚠</span>
+                <span style={{
+                  fontSize: 12, fontWeight: 700, color: C.red,
+                  letterSpacing: "0.08em", textTransform: "uppercase", ...mono,
+                }}>
+                  {w.risk}
+                </span>
+              </div>
+              <div style={{
+                fontSize: 11, color: C.text, ...sans, lineHeight: 1.4,
+                paddingLeft: 22,
+              }}>
+                <span style={{ color: C.amber, fontWeight: 600, ...mono }}>Action:</span>{" "}
+                {w.action}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* ── WHEN TIME PERMITS ── */}
         <Divider label="When time permits" />
 
@@ -758,6 +842,31 @@ function EditPanel({ idea, onSave, onClose, onExecute, onCancel }) {
             ✓ Executed at {form.executedAt}
           </div>
         )}
+
+        {/* Delete entry */}
+        <div style={{ borderTop:`1px solid ${C.border}`, marginTop:10, paddingTop:14 }}>
+          {!confirmDelete ? (
+            <button onClick={() => setConfirmDelete(true)} style={{
+              width:"100%", padding:"10px", borderRadius:8,
+              border:`1px solid ${C.border}`, background:"transparent",
+              color:C.textDim, fontSize:11, cursor:"pointer", ...mono,
+              transition:"all 0.15s",
+            }}>Delete Entry</button>
+          ) : (
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={() => setConfirmDelete(false)} style={{
+                flex:1, padding:"10px", borderRadius:8,
+                border:`1px solid ${C.border}`, background:"transparent",
+                color:C.textDim, fontSize:11, cursor:"pointer", ...mono,
+              }}>Cancel</button>
+              <button onClick={() => { onDelete(idea.id); onClose(); }} style={{
+                flex:1, padding:"10px", borderRadius:8,
+                border:`1px solid ${C.red}`, background:C.redDim,
+                color:C.red, fontSize:11, fontWeight:700, cursor:"pointer", ...mono,
+              }}>Confirm Delete</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -840,6 +949,7 @@ export default function App() {
   const addIdea    = kz => { const idea = newIdea(kz); setIdeas(p=>[...p,idea]); setEditing(idea); };
   const saveIdea   = u  => setIdeas(p=>p.map(i=>i.id===u.id?u:i));
   const executeIdea= u  => setIdeas(p=>p.map(i=>i.id===u.id?u:i));
+  const deleteIdea = id => setIdeas(p=>p.filter(i=>i.id!==id));
   const cancelIdea = id => setIdeas(p=>p.map(i=>i.id===id
     ? {...i,status:"cancelled",
         updatedAt:new Date().toLocaleTimeString("en-SG",{hour:"2-digit",minute:"2-digit"})}:i));
@@ -919,7 +1029,7 @@ export default function App() {
 
       {editing && (
         <EditPanel idea={editing} onSave={saveIdea} onClose={() => setEditing(null)}
-          onExecute={executeIdea} onCancel={cancelIdea} />
+          onExecute={executeIdea} onCancel={cancelIdea} onDelete={deleteIdea} />
       )}
     </div>
   );

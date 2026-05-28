@@ -73,6 +73,7 @@ create table ideas (
   daily_ctx        text,
   mthly_ctx        text,
   gates            jsonb default '{"G1":false,"G2":false,"G3":false,"G4":false}',
+  risk_factors     jsonb default '{"pwhl":false,"orb":false}',
   observation      text,
   executed_at      text
 );
