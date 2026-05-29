@@ -95,15 +95,17 @@ export function IdeasProvider({ children }) {
 
   // Derived data
   const boardIdeas    = ideas.filter(i => i.status !== "executed");
-  const executedIdeas = ideas.filter(i => i.status === "executed");
-  const watchingIdeas = ideas.filter(i => i.status === "watching");
-  const readyIdeas    = ideas.filter(i => i.status === "ready");
+  const executedIdeas  = ideas.filter(i => i.status === "executed");
+  const runningIdeas   = ideas.filter(i => i.status === "executed" && !i.exitPrice);
+  const completedIdeas = ideas.filter(i => i.status === "executed" && !!i.exitPrice);
+  const watchingIdeas  = ideas.filter(i => i.status === "watching");
+  const readyIdeas     = ideas.filter(i => i.status === "ready");
 
   return (
     <IdeasContext.Provider value={{
       ideas, editing, setEditing,
       addIdea, saveIdea, executeIdea, deleteIdea, cancelIdea, clearAll,
-      boardIdeas, executedIdeas, watchingIdeas, readyIdeas,
+      boardIdeas, executedIdeas, runningIdeas, completedIdeas, watchingIdeas, readyIdeas,
     }}>
       {children}
     </IdeasContext.Provider>

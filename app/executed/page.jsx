@@ -5,7 +5,8 @@ import IdeaCard from '../../components/IdeaCard';
 import { C, mono, sans } from '../../lib/constants';
 
 export default function ExecutedPage() {
-  const { executedIdeas, setEditing } = useIdeas();
+  const { runningIdeas, completedIdeas, setEditing } = useIdeas();
+  const total = runningIdeas.length + completedIdeas.length;
 
   return (
     <div style={{ background: C.bg, minHeight: '100vh', padding: '16px 16px 16px', ...sans }}>
@@ -16,22 +17,49 @@ export default function ExecutedPage() {
           <div style={{ fontSize: 22, fontWeight: 700, color: C.white,
             letterSpacing: '-0.02em' }}>Executed Trades</div>
           <div style={{ fontSize: 12, color: C.textDim, ...mono, marginTop: 4 }}>
-            {executedIdeas.length} trade{executedIdeas.length !== 1 ? 's' : ''}
+            {total} trade{total !== 1 ? 's' : ''}
           </div>
         </div>
 
-        {executedIdeas.length === 0 ? (
-          <div style={{ textAlign: 'center', color: C.textDim,
-            padding: 40, fontSize: 12, ...mono }}>
-            No executed trades yet.
+        {/* Running section */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 11, color: C.cyan, ...mono,
+            letterSpacing: '0.1em', marginBottom: 10 }}>
+            RUNNING ({runningIdeas.length})
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {executedIdeas.map(idea => (
-              <IdeaCard key={idea.id} idea={idea} onTap={() => setEditing(idea)} />
-            ))}
+          {runningIdeas.length === 0 ? (
+            <div style={{ textAlign: 'center', color: C.textDim,
+              padding: 20, fontSize: 12, ...mono }}>
+              No running trades.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {runningIdeas.map(idea => (
+                <IdeaCard key={idea.id} idea={idea} onTap={() => setEditing(idea)} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Completed section */}
+        <div>
+          <div style={{ fontSize: 11, color: C.green, ...mono,
+            letterSpacing: '0.1em', marginBottom: 10 }}>
+            COMPLETED ({completedIdeas.length})
           </div>
-        )}
+          {completedIdeas.length === 0 ? (
+            <div style={{ textAlign: 'center', color: C.textDim,
+              padding: 20, fontSize: 12, ...mono }}>
+              No completed trades.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {completedIdeas.map(idea => (
+                <IdeaCard key={idea.id} idea={idea} onTap={() => setEditing(idea)} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

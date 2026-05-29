@@ -120,7 +120,7 @@ export function LowerTfPicker({ value, onChange }) {
       <div style={{ fontSize:10, color:C.orange, ...mono,
         letterSpacing:"0.1em", marginBottom:8 }}>⚡ CHECK LOWER TIMEFRAME</div>
       <div style={{ display:"flex", gap:8 }}>
-        {["15m","30m"].map(tf => {
+        {["5m","15m","30m"].map(tf => {
           const active = value === tf;
           return (
             <button key={tf} onClick={() => onChange(active ? null : tf)} style={{

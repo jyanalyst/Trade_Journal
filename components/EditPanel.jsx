@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { C, KILL_ZONES, mono, sans } from '../lib/constants';
-import { calcSize, getRiskWarning } from '../lib/helpers';
+import { calcSize, calcPnL, getRiskWarning } from '../lib/helpers';
 import {
   Field, TextInput, Textarea, PhaseSelect, YesNo,
   LowerTfPicker, GateBtn, RiskBtn, CatalystRow,
@@ -191,6 +191,27 @@ export default function EditPanel({ idea, onSave, onClose, onExecute, onCancel, 
           <PhaseSelect label="Daily"   value={form.dailyCtx}  onChange={v => set("dailyCtx",v)}  />
         </div>
 
+        <Field label="Daily CRT Bias">
+          <div style={{ display:"flex", gap:6 }}>
+            {[
+              { val:"bullish",  label:"▲ Bullish", color:C.green, dim:C.greenDim },
+              { val:"bearish",  label:"▼ Bearish", color:C.red,   dim:C.redDim   },
+            ].map(opt => {
+              const active = form.crtBias === opt.val;
+              return (
+                <button key={opt.val} onClick={() => set("crtBias", active ? null : opt.val)}
+                  style={{
+                    flex:1, padding:"9px 0", borderRadius:6, cursor:"pointer",
+                    border:`1px solid ${active ? opt.color : C.border}`,
+                    background: active ? opt.dim : "transparent",
+                    color: active ? opt.color : C.textDim,
+                    fontSize:12, fontWeight:600, ...mono, transition:"all 0.15s",
+                  }}>{active ? `✓ ${opt.label}` : opt.label}</button>
+              );
+            })}
+          </div>
+        </Field>
+
         <Field label="POC Gates (G1–G4)">
           <div style={{ display:"flex", gap:8 }}>
             {["G1","G2","G3","G4"].map(g => (
@@ -226,12 +247,36 @@ export default function EditPanel({ idea, onSave, onClose, onExecute, onCancel, 
           }}>⚡ Mark Executed</button>
         )}
 
-        {isExecuted && (
-          <div style={{ textAlign:"center", fontSize:12, color:C.cyan,
-            ...mono, padding:"12px 0" }}>
-            ✓ Executed at {form.executedAt}
-          </div>
-        )}
+        {isExecuted && (() => {
+          const pnl = calcPnL(form.entry, form.exitPrice, form.direction, size?.shares);
+          return (
+            <>
+              <div style={{ marginBottom:14 }}>
+                <Field label="Exit Price (SGD)">
+                  <TextInput type="number" value={form.exitPrice} onChange={v => set("exitPrice",v)} placeholder="0.000" />
+                </Field>
+                {pnl !== null && (
+                  <div style={{
+                    background: pnl >= 0 ? C.greenDim : C.redDim,
+                    border:`1px solid ${pnl >= 0 ? `${C.green}44` : `${C.red}44`}`,
+                    borderRadius:8, padding:"10px 14px", marginTop:-6,
+                    display:"flex", justifyContent:"space-between", alignItems:"center",
+                  }}>
+                    <span style={{ fontSize:10, color:C.textDim, letterSpacing:"0.1em", ...mono }}>P&L</span>
+                    <span style={{ fontSize:20, fontWeight:700,
+                      color:pnl >= 0 ? C.green : C.red, ...mono }}>
+                      {pnl >= 0 ? "+" : ""}S${pnl.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div style={{ textAlign:"center", fontSize:10, color:C.textDim,
+                ...mono, paddingBottom:4 }}>
+                Executed at {form.executedAt}
+              </div>
+            </>
+          );
+        })()}
 
         {/* Delete entry */}
         <div style={{ borderTop:`1px solid ${C.border}`, marginTop:10, paddingTop:14 }}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { C, mono, sans } from '../lib/constants';
-import { todayISO, calcSize, getRiskWarning } from '../lib/helpers';
+import { todayISO, calcSize, calcPnL, getRiskWarning } from '../lib/helpers';
 import { PhaseBadge } from './primitives';
 import StatusBadge from './StatusBadge';
 import ActionStrip from './ActionStrip';
@@ -18,6 +18,8 @@ export default function IdeaCard({ idea, onTap }) {
   const isBackfill = idea.date !== todayISO();
 
   const riskWarning = getRiskWarning(idea.riskFactors);
+  const pnl = isExecuted && idea.exitPrice
+    ? calcPnL(idea.entry, idea.exitPrice, idea.direction, size?.shares) : null;
 
   return (
     <div onClick={onTap} style={{
@@ -134,6 +136,15 @@ export default function IdeaCard({ idea, onTap }) {
               borderRadius:4, border:`1px solid ${C.red}`,
               color:C.white, background:C.red, fontWeight:700 }}>FAKE BREAK</span>
           )}
+          {idea.crtBias && (
+            <span style={{ fontSize:9, ...mono, padding:"2px 6px",
+              borderRadius:4,
+              border:`1px solid ${idea.crtBias === "bullish" ? C.green : C.red}`,
+              color:idea.crtBias === "bullish" ? C.green : C.red,
+              background:idea.crtBias === "bullish" ? C.greenDim : C.redDim }}>
+              CRT {idea.crtBias === "bullish" ? "▲" : "▼"}
+            </span>
+          )}
         </div>
 
         {/* Risk warning action text */}
@@ -153,6 +164,21 @@ export default function IdeaCard({ idea, onTap }) {
                 {" — "}{riskWarning.action}
               </span>
             </div>
+          </div>
+        )}
+
+        {pnl !== null && (
+          <div style={{
+            display:"flex", justifyContent:"space-between", alignItems:"center",
+            background:pnl >= 0 ? C.greenDim : C.redDim,
+            border:`1px solid ${pnl >= 0 ? `${C.green}33` : `${C.red}33`}`,
+            borderRadius:5, padding:"5px 10px", marginTop:6,
+          }}>
+            <span style={{ fontSize:9, color:C.textDim, letterSpacing:"0.1em", ...mono }}>P&L</span>
+            <span style={{ fontSize:14, fontWeight:700,
+              color:pnl >= 0 ? C.green : C.red, ...mono }}>
+              {pnl >= 0 ? "+" : ""}S${pnl.toFixed(2)}
+            </span>
           </div>
         )}
 
