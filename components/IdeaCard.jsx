@@ -1,7 +1,7 @@
 'use client';
 
 import { C, mono, sans } from '../lib/constants';
-import { todayISO, calcSize, calcPnL, getRiskWarning } from '../lib/helpers';
+import { todayISO, calcSize, calcPnL, getRiskWarning, getDirectionalWarning } from '../lib/helpers';
 import { PhaseBadge } from './primitives';
 import StatusBadge from './StatusBadge';
 import ActionStrip from './ActionStrip';
@@ -18,6 +18,7 @@ export default function IdeaCard({ idea, onTap }) {
   const isBackfill = idea.date !== todayISO();
 
   const riskWarning = getRiskWarning(idea.riskFactors);
+  const dirWarning  = getDirectionalWarning(idea);
   const pnl = isExecuted && idea.exitPrice
     ? calcPnL(idea.entry, idea.exitPrice, idea.direction, size?.shares) : null;
 
@@ -171,6 +172,25 @@ export default function IdeaCard({ idea, onTap }) {
               </span>
               <span style={{ fontSize:10, color:C.amber, ...mono }}>
                 {" — "}{riskWarning.action}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {dirWarning && (
+          <div style={{
+            display:"flex", alignItems:"flex-start", gap:6,
+            background:C.amberDim,
+            border:`1px solid ${C.amber}33`,
+            borderRadius:5, padding:"5px 8px", marginTop:6,
+          }}>
+            <span style={{ fontSize:11, color:C.amber, flexShrink:0, marginTop:1 }}>⚠</span>
+            <div>
+              <span style={{ fontSize:10, fontWeight:700, color:C.amber, ...mono }}>
+                {dirWarning.risk}
+              </span>
+              <span style={{ fontSize:10, color:C.red, ...mono }}>
+                {" — "}{dirWarning.action}
               </span>
             </div>
           </div>

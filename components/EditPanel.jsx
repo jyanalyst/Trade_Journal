@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { C, KILL_ZONES, mono, sans } from '../lib/constants';
-import { calcSize, calcPnL, getRiskWarning } from '../lib/helpers';
+import { calcSize, calcPnL, getRiskWarning, getDirectionalWarning } from '../lib/helpers';
 import {
   Field, TextInput, Textarea, PhaseSelect, YesNo,
   LowerTfPicker, GateBtn, RiskBtn, CatalystRow,
@@ -233,6 +233,39 @@ export default function EditPanel({ idea, onSave, onClose, onExecute, onCancel, 
             })}
           </div>
         </Field>
+
+        {getDirectionalWarning(form) && (() => {
+          const w = getDirectionalWarning(form);
+          return (
+            <div style={{
+              background: C.amberDim,
+              border: `1px solid ${C.amber}55`,
+              borderRadius: 8,
+              padding: "12px 14px",
+              marginBottom: 14,
+              marginTop: -6,
+            }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 6, marginBottom: 6,
+              }}>
+                <span style={{ fontSize: 14 }}>⚠</span>
+                <span style={{
+                  fontSize: 12, fontWeight: 700, color: C.amber,
+                  letterSpacing: "0.08em", textTransform: "uppercase", ...mono,
+                }}>
+                  {w.risk}
+                </span>
+              </div>
+              <div style={{
+                fontSize: 11, color: C.text, ...sans, lineHeight: 1.4,
+                paddingLeft: 22,
+              }}>
+                <span style={{ color: C.red, fontWeight: 600, ...mono }}>Action:</span>{" "}
+                {w.action}
+              </div>
+            </div>
+          );
+        })()}
 
         <Field label="POC Gates (G1–G4)">
           <div style={{ display:"flex", gap:8 }}>
