@@ -212,6 +212,28 @@ export default function EditPanel({ idea, onSave, onClose, onExecute, onCancel, 
           </div>
         </Field>
 
+        <Field label="Daily Candle">
+          <div style={{ display:"flex", gap:6 }}>
+            {[
+              { val:"wick",       label:"Wick",       color:C.amber, dim:C.amberDim },
+              { val:"inside_day", label:"Inside Day", color:C.blue,  dim:C.blueDim  },
+              { val:"break",      label:"Break",      color:C.cyan,  dim:"rgba(0,212,255,0.12)" },
+            ].map(opt => {
+              const active = form.dailyCandle === opt.val;
+              return (
+                <button key={opt.val} onClick={() => set("dailyCandle", active ? null : opt.val)}
+                  style={{
+                    flex:1, padding:"9px 0", borderRadius:6, cursor:"pointer",
+                    border:`1px solid ${active ? opt.color : C.border}`,
+                    background: active ? opt.dim : "transparent",
+                    color: active ? opt.color : C.textDim,
+                    fontSize:12, fontWeight:600, ...mono, transition:"all 0.15s",
+                  }}>{active ? `✓ ${opt.label}` : opt.label}</button>
+              );
+            })}
+          </div>
+        </Field>
+
         <Field label="POC Gates (G1–G4)">
           <div style={{ display:"flex", gap:8 }}>
             {["G1","G2","G3","G4"].map(g => (

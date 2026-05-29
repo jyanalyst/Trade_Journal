@@ -145,6 +145,15 @@ export default function IdeaCard({ idea, onTap }) {
               CRT {idea.crtBias === "bullish" ? "▲" : "▼"}
             </span>
           )}
+          {idea.dailyCandle && (() => {
+            const m = { wick:{color:C.amber,bg:C.amberDim,label:"Wick"},
+              inside_day:{color:C.blue,bg:C.blueDim,label:"Inside"},
+              break:{color:C.cyan,bg:"rgba(0,212,255,0.12)",label:"Break"} };
+            const s = m[idea.dailyCandle];
+            return s ? <span style={{ fontSize:9, ...mono, padding:"2px 6px",
+              borderRadius:4, border:`1px solid ${s.color}`,
+              color:s.color, background:s.bg }}>{s.label}</span> : null;
+          })()}
         </div>
 
         {/* Risk warning action text */}
