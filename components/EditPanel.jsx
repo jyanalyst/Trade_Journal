@@ -333,6 +333,15 @@ export default function EditPanel({ idea, onSave, onClose, onExecute, onCancel, 
           );
         })()}
 
+        {/* Save button */}
+        <button onClick={() => { handleSave(); onClose(); }} style={{
+          width:"100%", padding:"13px", borderRadius:10,
+          border:`1px solid ${C.amber}`, background:C.amberDim,
+          color:C.amber, fontSize:13, fontWeight:700,
+          cursor:"pointer", ...mono, letterSpacing:"0.1em", textTransform:"uppercase",
+          marginTop:10, transition:"background 0.2s, color 0.2s",
+        }}>Save</button>
+
         {/* Delete entry */}
         <div style={{ borderTop:`1px solid ${C.border}`, marginTop:10, paddingTop:14 }}>
           {!confirmDelete ? (
